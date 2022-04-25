@@ -36,7 +36,6 @@ public class DogKnightController : MonoBehaviour
 
         //Rigidbodyコンポーネントを取得
         this.myRigidbody = GetComponent<Rigidbody>();
-
     }
 
     void Update ()
@@ -56,6 +55,7 @@ public class DogKnightController : MonoBehaviour
         //ゲーム終了なら犬さんの動きを減衰する
         if (this.isEnd)
         {
+			//減衰
             this.velocityZ *= this.coefficient;
             this.velocityX *= this.coefficient;
             this.myAnimator.speed *= this.coefficient;
@@ -76,24 +76,47 @@ public class DogKnightController : MonoBehaviour
             inputVelocityX = this.velocityX;
         }
 
-        //DogKnightに速度を与える
-        this.myRigidbody.velocity = new Vector3(inputVelocityX, 0, velocityZ);
+		//ゲーム終了のチェック ※地面より下へ落ちてー1ｍでゲームーバー、かつ isEndがtrueじゃない時
+		if( this.transform.position.y < -1f && this.isEnd == false)
+		{
+			//リザルトUIへゲームオーバーを表示
+
+
+			//効果音（ゲームオーバージングル）
+
+
+			//減衰（エンド）
+			this.isEnd = true;
+		}
+
+        //DogKnightに速度を与える ※カリキュラムに無いテクニック（スルー）
+        this.myRigidbody.velocity = new Vector3(inputVelocityX, this.myRigidbody.velocity.y, velocityZ);
     }
 
     //トリガーモードで他のオブジェクトと接触した場合の処理
     void OnTriggerEnter(Collider other)
     {
-        //ゴール地点に到達した場合
-        if (other.gameObject.tag == "GoalTag")
+        //ゴール地点に到達した場合、かつ isEndがtrueじゃない時
+        if (other.gameObject.tag == "GoalTag" && this.isEnd == false)
         {
+			//リザルトUIへゲームクリアーを表示
+
+
+			//効果音
+
+
+			//減衰（エンド）
             this.isEnd = true;
         }
 
-        //コインに衝突した場合
+        //リンゴに衝突した場合
         if (other.gameObject.tag == "AppleTag")
         {
             //パーティクルを再生（追加）
             GetComponent<ParticleSystem>().Play();
+
+			//効果音
+
 
             //接触したリンゴのオブジェクトを破棄
             Destroy(other.gameObject);
