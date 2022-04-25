@@ -7,6 +7,24 @@ public class DogKnightController : MonoBehaviour
     //アニメーションするためのコンポーネントを入れる
     private Animator myAnimator;
 
+    //DogKnightを移動させるコンポーネントを入れる（追加）
+    private Rigidbody myRigidbody;
+
+    //前方向の速度
+    private float velocityZ = 11f;
+
+    //横方向の速度
+    private float velocityX = 7f;
+
+    //左右の移動できる範囲
+    private float movableRange = 1.5f;
+
+    //動きを減速させる係数
+    private float coefficient = 0.99f;
+
+    //ゲーム終了の判定
+    private bool isEnd = false;
+
     // Use this for initialization
     void Start ()
     {
@@ -15,11 +33,16 @@ public class DogKnightController : MonoBehaviour
 
         //走るアニメーションを開始
         this.myAnimator.SetFloat ("Speed", 1);
+
+        //Rigidbodyコンポーネントを取得
+        this.myRigidbody = GetComponent<Rigidbody>();
+
     }
 
     void Update ()
     {
-		//マウスクリック
+        /*
+        //マウスクリック
 		if( Input.GetMouseButtonDown(0))
 		{
 			//タイプセレクト
@@ -28,5 +51,52 @@ public class DogKnightController : MonoBehaviour
 			//斬るアニメーションの開始（トリガー）
 			this.myAnimator.SetTrigger("Attack");
 		}
+        */
+
+        //ゲーム終了なら犬さんの動きを減衰する
+        if (this.isEnd)
+        {
+            this.velocityZ *= this.coefficient;
+            this.velocityX *= this.coefficient;
+            this.myAnimator.speed *= this.coefficient;
+        }
+
+        //横方向の入力による速度
+        float inputVelocityX = 0;
+
+        //矢印キーまたはボタンに応じて左右に移動させる
+        if (Input.GetKey(KeyCode.LeftArrow) && -this.movableRange < this.transform.position.x)
+        {
+            //左方向への速度を代入
+            inputVelocityX = -this.velocityX;
+        }
+        else if (Input.GetKey(KeyCode.RightArrow) && this.transform.position.x < this.movableRange)
+        {
+            //右方向への速度を代入
+            inputVelocityX = this.velocityX;
+        }
+
+        //DogKnightに速度を与える
+        this.myRigidbody.velocity = new Vector3(inputVelocityX, 0, velocityZ);
+    }
+
+    //トリガーモードで他のオブジェクトと接触した場合の処理
+    void OnTriggerEnter(Collider other)
+    {
+        //ゴール地点に到達した場合
+        if (other.gameObject.tag == "GoalTag")
+        {
+            this.isEnd = true;
+        }
+
+        //コインに衝突した場合
+        if (other.gameObject.tag == "AppleTag")
+        {
+            //パーティクルを再生（追加）
+            GetComponent<ParticleSystem>().Play();
+
+            //接触したリンゴのオブジェクトを破棄
+            Destroy(other.gameObject);
+        }
     }
 }
