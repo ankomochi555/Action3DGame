@@ -52,11 +52,19 @@ public class AppleGenerator : MonoBehaviour
 				r = 1;
 			}
 
-			//×‚¢‹´‡B@¶‘¤
+            //×‚¢‹´‡B@¶‘¤
+            if (i >= 245 && i <= 252)
+            {
+                //¶‘¤
+                r = -1;
+            }
 
-
-			//×‚¢‹´‡C@¶‘¤
-
+            //×‚¢‹´‡C@¶‘¤
+            if (i >= 263 && i <= 270)
+            {
+                //¶‘¤
+                r = -1;
+            }
 
             //ƒŠƒ“ƒS‚ð¶¬ ¦Prefab‚ÌYÀ•W‚ð‚»‚Ì‚Ü‚ÜƒXƒ‹[‚³‚¹‚Ä‚¢‚éB
             GameObject apple = Instantiate(applePrefab);

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;  //（追加）
+
 
 public class DogKnightController : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class DogKnightController : MonoBehaviour
     private Rigidbody myRigidbody;
 
     //前方向の速度
-    private float velocityZ = 11f;
+    private float velocityZ = 9f;
 
     //横方向の速度
     private float velocityX = 7f;
@@ -25,6 +27,20 @@ public class DogKnightController : MonoBehaviour
     //ゲーム終了の判定
     private bool isEnd = false;
 
+    //ゲーム終了時に表示するテキスト（追加）
+    private GameObject stateText;
+
+    //スコアを表示するテキスト（追加）
+    private GameObject scoreText;
+
+    //得点（追加）
+    private int score = 0;
+
+    //効果音の登録
+    public AudioClip appleSE;
+    public AudioClip gameOverSE;
+    public AudioClip gameClearSE;
+
     // Use this for initialization
     void Start ()
     {
@@ -36,6 +52,13 @@ public class DogKnightController : MonoBehaviour
 
         //Rigidbodyコンポーネントを取得
         this.myRigidbody = GetComponent<Rigidbody>();
+
+        //シーン中のstateTextオブジェクトを取得（追加）
+        this.stateText = GameObject.Find("ResultText");
+
+        //シーン中のscoreTextオブジェクトを取得（追加）
+        this.scoreText = GameObject.Find("ScoreText");
+
     }
 
     void Update ()
@@ -79,19 +102,20 @@ public class DogKnightController : MonoBehaviour
 		//ゲーム終了のチェック ※地面より下へ落ちてー1ｍでゲームーバー、かつ isEndがtrueじゃない時
 		if( this.transform.position.y < -1f && this.isEnd == false)
 		{
-			//リザルトUIへゲームオーバーを表示
+            //リザルトUIへゲームオーバーを表示
+            this.stateText.GetComponent<Text>().text = "Game Over";
 
+            //効果音（ゲームオーバージングル）
+            GetComponent<AudioSource>().PlayOneShot(gameOverSE);
 
-			//効果音（ゲームオーバージングル）
-
-
-			//減衰（エンド）
-			this.isEnd = true;
+            //減衰（エンド）
+            this.isEnd = true;
 		}
 
         //DogKnightに速度を与える ※カリキュラムに無いテクニック（スルー）
         this.myRigidbody.velocity = new Vector3(inputVelocityX, this.myRigidbody.velocity.y, velocityZ);
     }
+
 
     //トリガーモードで他のオブジェクトと接触した場合の処理
     void OnTriggerEnter(Collider other)
@@ -99,24 +123,30 @@ public class DogKnightController : MonoBehaviour
         //ゴール地点に到達した場合、かつ isEndがtrueじゃない時
         if (other.gameObject.tag == "GoalTag" && this.isEnd == false)
         {
-			//リザルトUIへゲームクリアーを表示
+            //リザルトUIへゲームクリアーを表示
+            this.stateText.GetComponent<Text>().text = "CLEAR!!";
 
+            //効果音
+            GetComponent<AudioSource>().PlayOneShot(gameClearSE);
 
-			//効果音
-
-
-			//減衰（エンド）
+            //減衰（エンド）
             this.isEnd = true;
         }
 
         //リンゴに衝突した場合
         if (other.gameObject.tag == "AppleTag")
         {
-            //パーティクルを再生（追加）
+            //パーティクルを再生
             GetComponent<ParticleSystem>().Play();
 
-			//効果音
+            // スコアを加算(追加)
+            this.score += 10;
 
+            //ScoreTextに獲得した点数を表示(追加)
+            this.scoreText.GetComponent<Text>().text = "Score " + this.score + "pt";
+
+            //効果音
+            GetComponent<AudioSource>().PlayOneShot(appleSE);
 
             //接触したリンゴのオブジェクトを破棄
             Destroy(other.gameObject);
